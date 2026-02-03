@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanitätssystem Konfigurator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #dc2626;
+            --primary-dark: #991b1b;
+            --accent: #ef4444;
+            --bg-dark: #1a1a1a;
+            --bg-card: #ffffff;
+            --text-light: #1a1a1a;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --success: #dc2626;
+            --bg-page: #f9fafb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-light);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(220, 38, 38, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(220, 38, 38, 0.03) 0%, transparent 50%);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            animation: fadeIn 1s ease-out 0.3s backwards;
+        }
+
+        .configurator-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .config-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out backwards;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .config-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(220, 38, 38, 0.15);
+        }
+
+        .section-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .option-card:hover::before {
+            left: 100%;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.05));
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.2);
+        }
+
+        .option-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-light);
+        }
+
+        .option-price {
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 700;
+            color: var(--success);
+            font-size: 1.2rem;
+        }
+
+        .option-description {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .checkbox-group {
+            margin-top: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(220, 38, 38, 0.05);
+            border-color: var(--primary);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 1rem;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-label {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkbox-name {
+            font-weight: 500;
+        }
+
+        .checkbox-price {
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .summary-panel {
+            position: sticky;
+            top: 2rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 2px solid var(--primary);
+            box-shadow: 0 8px 32px rgba(220, 38, 38, 0.15);
+            animation: fadeInRight 0.8s ease-out;
+        }
+
+        .summary-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .summary-item-name {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .summary-item-price {
+            color: var(--success);
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+        }
+
+        .summary-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin: 1.5rem 0;
+        }
+
+        .total-price {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(239, 68, 68, 0.05));
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .total-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .total-amount {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        .roi-calculator {
+            margin-top: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .roi-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin: 2rem 0 1.5rem 0;
+        }
+
+        .roi-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .roi-input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .roi-input-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .roi-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .roi-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .roi-results {
+            background: rgba(220, 38, 38, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .roi-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            font-size: 0.95rem;
+        }
+
+        .roi-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .roi-value {
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 700;
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .roi-highlight {
+            margin-top: 1rem;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(239, 68, 68, 0.1));
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid var(--primary);
+        }
+
+        .roi-highlight .roi-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .roi-break-even {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-top: 0.25rem;
+        }
+
+        .roi-savings {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .roi-savings .roi-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: #15803d;
+        }
+
+        .roi-savings-amount {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #15803d;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .configurator-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-panel {
+                position: relative;
+                top: 0;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .config-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sanitätssystem Konfigurator</h1>
+            <p class="subtitle">Stelle dein individuelles System zusammen</p>
+        </header>
+
+        <div class="configurator-grid">
+            <div class="config-main">
+                <!-- Basis Hardware -->
+                <div class="config-section" style="animation-delay: 0.1s;">
+                    <h2 class="section-title">
+                        <span class="section-icon">1</span>
+                        Basis Hardware
+                    </h2>
+                    <div id="hardware-options"></div>
+                </div>
+
+                <!-- Kartenleser -->
+                <div class="config-section" style="animation-delay: 0.2s;">
+                    <h2 class="section-title">
+                        <span class="section-icon">2</span>
+                        Kartenleser
+                    </h2>
+                    <div id="cardreader-options"></div>
+                </div>
+
+                <!-- Display -->
+                <div class="config-section" style="animation-delay: 0.3s;">
+                    <h2 class="section-title">
+                        <span class="section-icon">3</span>
+                        Display
+                    </h2>
+                    <div id="display-options"></div>
+                </div>
+
+                <!-- Software & Zubehör -->
+                <div class="config-section" style="animation-delay: 0.4s;">
+                    <h2 class="section-title">
+                        <span class="section-icon">4</span>
+                        Software & Zubehör
+                    </h2>
+                    <div class="checkbox-group" id="accessories-options"></div>
+                </div>
+            </div>
+
+            <!-- Summary Panel -->
+            <div class="summary-panel">
+                <h2 class="summary-title">Deine Konfiguration</h2>
+                <div id="summary-items"></div>
+                <div class="summary-divider"></div>
+                <div class="total-price">
+                    <div class="total-label">Gesamtpreis</div>
+                    <div class="total-amount" id="total-price">0,00 €</div>
+                </div>
+                
+                <!-- ROI Calculator -->
+                <div class="roi-calculator" id="roi-section" style="display: none;">
+                    <div class="roi-divider"></div>
+                    <h3 class="roi-title">Amortisation</h3>
+                    <div class="roi-input-group">
+                        <label for="patient-count">Anzahl Einsätze pro Monat:</label>
+                        <input type="number" id="patient-count" min="1" value="85" class="roi-input">
+                    </div>
+                    <div class="roi-input-group">
+                        <label for="electricity-price">Strompreis (€/kWh):</label>
+                        <input type="number" id="electricity-price" min="0" step="0.01" value="0.30" class="roi-input">
+                    </div>
+                    <div class="roi-results">
+                        <div class="roi-item">
+                            <span class="roi-label">Stromverbrauch/Monat:</span>
+                            <span class="roi-value" id="power-consumption">0 kWh</span>
+                        </div>
+                        <div class="roi-item">
+                            <span class="roi-label">Stromkosten/Monat:</span>
+                            <span class="roi-value" id="power-cost-monthly">0,00 €</span>
+                        </div>
+                        <div class="roi-item">
+                            <span class="roi-label">Stromkosten/Jahr:</span>
+                            <span class="roi-value" id="power-cost-yearly">0,00 €</span>
+                        </div>
+                        <div class="summary-divider" style="margin: 1rem 0;"></div>
+                        <div class="roi-item">
+                            <span class="roi-label">Kosten analog/Monat:</span>
+                            <span class="roi-value" id="analog-monthly">0,00 €</span>
+                        </div>
+                        <div class="roi-item">
+                            <span class="roi-label">Kosten analog/Jahr:</span>
+                            <span class="roi-value" id="analog-yearly">0,00 €</span>
+                        </div>
+                        <div class="roi-highlight">
+                            <div class="roi-label">Amortisation nach:</div>
+                            <div class="roi-break-even" id="break-even">-- Monate</div>
+                        </div>
+                        <div class="roi-savings">
+                            <div class="roi-label">Ersparnis nach 1 Jahr:</div>
+                            <div class="roi-savings-amount" id="yearly-savings">0,00 €</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="action-button" onclick="submitConfiguration()">Anfrage senden</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const config = {
+            hardware: [
+                {
+                    id: 'software-only',
+                    name: 'Nur Software',
+                    description: 'Software-Lösung ohne Hardware, für bestehende Systeme',
+                    price: 299,
+                    powerConsumption: 0 // kWh/Monat
+                },
+                {
+                    id: 'raspi-basic',
+                    name: 'Raspberry Pi Basispaket',
+                    description: 'Raspberry Pi 4 mit vorinstallierter Software',
+                    price: 499,
+                    powerConsumption: 2.5 // ~3.5W * 24h * 30d / 1000
+                },
+                {
+                    id: 'raspi-advanced',
+                    name: 'Raspberry Pi Advanced',
+                    description: 'Raspberry Pi 4 mit erweiterten Spezifikationen (8GB RAM)',
+                    price: 649,
+                    powerConsumption: 3.0 // ~4W * 24h * 30d / 1000
+                }
+            ],
+            cardreader: [
+                {
+                    id: 'no-reader',
+                    name: 'Kein Kartenleser',
+                    description: 'Ohne Kartenlesefunktion',
+                    price: 0,
+                    powerConsumption: 0
+                },
+                {
+                    id: 'basic-reader',
+                    name: 'Standard Kartenleser',
+                    description: 'USB-Kartenleser für Krankenversichertenkarte',
+                    price: 129,
+                    powerConsumption: 0.36 // ~0.5W * 24h * 30d / 1000
+                },
+                {
+                    id: 'advanced-reader',
+                    name: 'Premium Kartenleser',
+                    description: 'Kontaktloser Kartenleser mit NFC-Unterstützung',
+                    price: 249,
+                    powerConsumption: 0.72 // ~1W * 24h * 30d / 1000
+                }
+            ],
+            display: [
+                {
+                    id: 'no-display',
+                    name: 'Kein Display',
+                    description: 'Headless-Betrieb oder externe Anzeige',
+                    price: 0,
+                    powerConsumption: 0
+                },
+                {
+                    id: 'basic-display',
+                    name: '7" Touchdisplay',
+                    description: 'Offizielles Raspberry Pi 7" Touchdisplay',
+                    price: 179,
+                    powerConsumption: 1.44 // ~2W * 24h * 30d / 1000
+                },
+                {
+                    id: 'advanced-display',
+                    name: '10" Touchdisplay',
+                    description: 'Hochauflösendes 10" Display mit kapazitivem Touch',
+                    price: 349,
+                    powerConsumption: 2.16 // ~3W * 24h * 30d / 1000
+                }
+            ],
+            accessories: [
+                {
+                    id: 'case',
+                    name: 'Schutzgehäuse',
+                    price: 79,
+                    powerConsumption: 0
+                },
+                {
+                    id: 'mount',
+                    name: 'Wandhalterung',
+                    price: 49,
+                    powerConsumption: 0
+                },
+                {
+                    id: 'backup',
+                    name: 'Backup-System',
+                    price: 199,
+                    powerConsumption: 1.0 // Zusätzliche Backup-Hardware
+                },
+                {
+                    id: 'support',
+                    name: 'Erweiterter Support (1 Jahr)',
+                    price: 299,
+                    powerConsumption: 0
+                },
+                {
+                    id: 'training',
+                    name: 'Schulung & Einweisung',
+                    price: 399,
+                    powerConsumption: 0
+                }
+            ]
+        };
+
+        let selectedConfig = {
+            hardware: null,
+            cardreader: null,
+            display: null,
+            accessories: []
+        };
+
+        function renderOptions(category, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            config[category].forEach(option => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                if (selectedConfig[category] === option.id) {
+                    card.classList.add('selected');
+                }
+
+                card.innerHTML = `
+                    <div class="option-header">
+                        <div class="option-name">${option.name}</div>
+                        <div class="option-price">${option.price.toFixed(2)} €</div>
+                    </div>
+                    <div class="option-description">${option.description}</div>
+                `;
+
+                card.addEventListener('click', () => {
+                    selectedConfig[category] = option.id;
+                    renderOptions(category, containerId);
+                    updateSummary();
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+        function renderAccessories() {
+            const container = document.getElementById('accessories-options');
+            container.innerHTML = '';
+
+            config.accessories.forEach(accessory => {
+                const item = document.createElement('div');
+                item.className = 'checkbox-item';
+
+                const isChecked = selectedConfig.accessories.includes(accessory.id);
+
+                item.innerHTML = `
+                    <input type="checkbox" id="acc-${accessory.id}" ${isChecked ? 'checked' : ''}>
+                    <label class="checkbox-label" for="acc-${accessory.id}">
+                        <span class="checkbox-name">${accessory.name}</span>
+                        <span class="checkbox-price">${accessory.price.toFixed(2)} €</span>
+                    </label>
+                `;
+
+                const checkbox = item.querySelector('input');
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedConfig.accessories.push(accessory.id);
+                    } else {
+                        selectedConfig.accessories = selectedConfig.accessories.filter(id => id !== accessory.id);
+                    }
+                    updateSummary();
+                });
+
+                container.appendChild(item);
+            });
+        }
+
+        function updateSummary() {
+            const summaryContainer = document.getElementById('summary-items');
+            const items = [];
+            let total = 0;
+
+            // Hardware
+            if (selectedConfig.hardware) {
+                const hw = config.hardware.find(h => h.id === selectedConfig.hardware);
+                items.push({ name: hw.name, price: hw.price });
+                total += hw.price;
+            }
+
+            // Kartenleser
+            if (selectedConfig.cardreader) {
+                const cr = config.cardreader.find(c => c.id === selectedConfig.cardreader);
+                if (cr.price > 0) {
+                    items.push({ name: cr.name, price: cr.price });
+                    total += cr.price;
+                }
+            }
+
+            // Display
+            if (selectedConfig.display) {
+                const disp = config.display.find(d => d.id === selectedConfig.display);
+                if (disp.price > 0) {
+                    items.push({ name: disp.name, price: disp.price });
+                    total += disp.price;
+                }
+            }
+
+            // Zubehör
+            selectedConfig.accessories.forEach(accId => {
+                const acc = config.accessories.find(a => a.id === accId);
+                items.push({ name: acc.name, price: acc.price });
+                total += acc.price;
+            });
+
+            // Render summary
+            if (items.length === 0) {
+                summaryContainer.innerHTML = '<div class="empty-state">Noch keine Komponenten ausgewählt</div>';
+            } else {
+                summaryContainer.innerHTML = items.map(item => `
+                    <div class="summary-item">
+                        <span class="summary-item-name">${item.name}</span>
+                        <span class="summary-item-price">${item.price.toFixed(2)} €</span>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('total-price').textContent = total.toFixed(2) + ' €';
+            
+            // Show/hide ROI calculator and update calculations
+            const roiSection = document.getElementById('roi-section');
+            if (total > 0) {
+                roiSection.style.display = 'block';
+                calculateROI(total);
+            } else {
+                roiSection.style.display = 'none';
+            }
+        }
+
+        function calculateROI(totalCost) {
+            const missionsPerMonth = parseInt(document.getElementById('patient-count').value) || 85;
+            const electricityPrice = parseFloat(document.getElementById('electricity-price').value) || 0.30;
+            
+            // Calculate total power consumption
+            let totalPowerConsumption = 0;
+            
+            // Hardware
+            if (selectedConfig.hardware) {
+                const hw = config.hardware.find(h => h.id === selectedConfig.hardware);
+                totalPowerConsumption += hw.powerConsumption || 0;
+            }
+            
+            // Kartenleser
+            if (selectedConfig.cardreader) {
+                const cr = config.cardreader.find(c => c.id === selectedConfig.cardreader);
+                totalPowerConsumption += cr.powerConsumption || 0;
+            }
+            
+            // Display
+            if (selectedConfig.display) {
+                const disp = config.display.find(d => d.id === selectedConfig.display);
+                totalPowerConsumption += disp.powerConsumption || 0;
+            }
+            
+            // Zubehör
+            selectedConfig.accessories.forEach(accId => {
+                const acc = config.accessories.find(a => a.id === accId);
+                totalPowerConsumption += acc.powerConsumption || 0;
+            });
+            
+            // Calculate power costs
+            const powerCostMonthly = totalPowerConsumption * electricityPrice;
+            const powerCostYearly = powerCostMonthly * 12;
+            
+            // Analog system cost: y = 0.03 * 85 * x
+            const analogMonthly = 0.03 * 85 * missionsPerMonth;
+            const analogYearly = analogMonthly * 12;
+            
+            // Total digital system cost including power
+            const digitalMonthly = powerCostMonthly;
+            const digitalYearly = powerCostYearly;
+            const totalDigitalCost = totalCost + digitalYearly; // Initial investment + yearly running cost
+            
+            // Break-even calculation (considering monthly savings)
+            const monthlySavings = analogMonthly - digitalMonthly;
+            const breakEvenMonths = monthlySavings > 0 ? totalCost / monthlySavings : Infinity;
+            
+            // Yearly savings (analog yearly cost - (initial cost + digital yearly cost))
+            const yearlySavings = analogYearly - totalDigitalCost;
+            
+            // Update display
+            document.getElementById('power-consumption').textContent = totalPowerConsumption.toFixed(2) + ' kWh';
+            document.getElementById('power-cost-monthly').textContent = powerCostMonthly.toFixed(2) + ' €';
+            document.getElementById('power-cost-yearly').textContent = powerCostYearly.toFixed(2) + ' €';
+            document.getElementById('analog-monthly').textContent = analogMonthly.toFixed(2) + ' €';
+            document.getElementById('analog-yearly').textContent = analogYearly.toFixed(2) + ' €';
+            
+            if (!isFinite(breakEvenMonths) || breakEvenMonths < 0) {
+                document.getElementById('break-even').textContent = 'Nicht rentabel';
+            } else if (breakEvenMonths < 1) {
+                document.getElementById('break-even').textContent = Math.ceil(breakEvenMonths * 30) + ' Tage';
+            } else if (breakEvenMonths > 120) {
+                document.getElementById('break-even').textContent = '> 10 Jahre';
+            } else {
+                document.getElementById('break-even').textContent = Math.ceil(breakEvenMonths) + ' Monate';
+            }
+            
+            if (yearlySavings > 0) {
+                document.getElementById('yearly-savings').textContent = yearlySavings.toFixed(2) + ' €';
+                document.getElementById('yearly-savings').style.color = '#15803d';
+            } else {
+                document.getElementById('yearly-savings').textContent = Math.abs(yearlySavings).toFixed(2) + ' € (Mehrkosten)';
+                document.getElementById('yearly-savings').style.color = '#dc2626';
+            }
+        }
+
+        // Add event listener for missions input
+        document.addEventListener('DOMContentLoaded', function() {
+            const patientInput = document.getElementById('patient-count');
+            const electricityInput = document.getElementById('electricity-price');
+            
+            if (patientInput) {
+                patientInput.addEventListener('input', function() {
+                    const total = parseFloat(document.getElementById('total-price').textContent.replace(' €', '').replace(',', '.'));
+                    if (total > 0) {
+                        calculateROI(total);
+                    }
+                });
+            }
+            
+            if (electricityInput) {
+                electricityInput.addEventListener('input', function() {
+                    const total = parseFloat(document.getElementById('total-price').textContent.replace(' €', '').replace(',', '.'));
+                    if (total > 0) {
+                        calculateROI(total);
+                    }
+                });
+            }
+        });
+
+        function submitConfiguration() {
+            const items = [];
+            
+            if (selectedConfig.hardware) {
+                const hw = config.hardware.find(h => h.id === selectedConfig.hardware);
+                items.push(hw.name);
+            }
+            if (selectedConfig.cardreader) {
+                const cr = config.cardreader.find(c => c.id === selectedConfig.cardreader);
+                if (cr.price > 0) items.push(cr.name);
+            }
+            if (selectedConfig.display) {
+                const disp = config.display.find(d => d.id === selectedConfig.display);
+                if (disp.price > 0) items.push(disp.name);
+            }
+            selectedConfig.accessories.forEach(accId => {
+                const acc = config.accessories.find(a => a.id === accId);
+                items.push(acc.name);
+            });
+
+            if (items.length === 0) {
+                alert('Bitte wähle mindestens eine Komponente aus.');
+                return;
+            }
+
+            const total = document.getElementById('total-price').textContent;
+            alert(`Konfiguration wird gesendet:\n\n${items.join('\n')}\n\nGesamtpreis: ${total}\n\nVielen Dank für deine Anfrage!`);
+        }
+
+        // Initialize
+        renderOptions('hardware', 'hardware-options');
+        renderOptions('cardreader', 'cardreader-options');
+        renderOptions('display', 'display-options');
+        renderAccessories();
+        updateSummary();
+    </script>
+</body>
+</html>
